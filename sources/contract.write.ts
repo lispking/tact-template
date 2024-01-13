@@ -1,6 +1,6 @@
 import { Address, contractAddress, toNano } from "@ton/core";
 import { TonClient4, WalletContractV4 } from "@ton/ton";
-import { SampleTactContract } from "./output/sample_SampleTactContract";
+import { Divide, Multiply, SampleTactContract } from "./output/sample_SampleTactContract";
 import { mnemonicToPrivateKey } from "@ton/crypto";
 
 const Sleep = (ms: number)=> {
@@ -22,16 +22,24 @@ const Sleep = (ms: number)=> {
     const walletSender = walletContract.sender(key.secretKey);
 
     // open the contract address
-    let owner = Address.parse("0QD8d5vx-7hiviuMMCU_xXHyg9PToCHgQB1MwcTkgG7dIbkt");
+    let owner = Address.parse("0QDuIfdJlOarisWhTHvUCbuxGGsAMx2CEW3t9CccWK0R8VjF");
     let init = await SampleTactContract.init(owner);
     let contract_address = contractAddress(0, init);
     let contract = await SampleTactContract.fromAddress(contract_address);
     let contract_open = await client.open(contract);
 
     // send message to contract
-    await contract_open.send(walletSender, { value: toNano(1) }, "increment");
+    // await contract_open.send(walletSender, { value: toNano(1) }, "increment");
+
+    contract_open.send(walletSender, {value: toNano("0.01")}, {
+        $$type: 'Multiply', amount: 2n
+    } as Multiply);
+
+    contract_open.send(walletSender, {value: toNano("0.01")}, {
+        $$type: 'Divide', amount: 2n
+    } as Divide);
     
     await Sleep(3000);
-    console.log("Counter Value: " + (await contract_open.getCounter()));
+    console.log("Counter Value: " + (await contract_open.getValue()));
 })();
 
